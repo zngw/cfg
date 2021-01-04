@@ -1,0 +1,1 @@
+db.getCollection("TableConst").drop();db.createCollection("TableConst");db.getCollection("TableConst").insert({down_url:"https://zengwu.com.cn",init_coin:NumberInt("10000")});

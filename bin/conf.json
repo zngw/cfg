@@ -1,0 +1,6 @@
+{
+    "path":"./excel",
+    "pre":"Table",
+    "client":["json","js","ts"],
+    "server":["mdb","csv"]
+}
