@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -50,11 +51,21 @@ func GetFilesInDirs(dirPth string) (files []string, err error) {
 
 // 过滤隐藏属性文件
 func checkIsHidden(file os.FileInfo) bool {
-	//"通过反射来获取Win32FileAttributeData的FileAttributes
-	fa := reflect.ValueOf(file.Sys()).Elem().FieldByName("FileAttributes").Uint()
-	bytefa := []byte(strconv.FormatUint(fa, 2))
-	if bytefa[len(bytefa)-2] == '1' {
-		return true
+	if runtime.GOOS == "windows" {
+		//"通过反射来获取Win32FileAttributeData的FileAttributes
+		fa := reflect.ValueOf(file.Sys()).Elem().FieldByName("FileAttributes").Uint()
+		bytefa := []byte(strconv.FormatUint(fa, 2))
+		if bytefa[len(bytefa)-2] == '1' {
+			return true
+		}
+		return false
+	} else {
+		if len(file.Name()) > 0 {
+			if file.Name()[0] == '.' {
+				return true
+			}
+		}
 	}
+
 	return false
 }
