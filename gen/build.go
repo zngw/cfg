@@ -3,7 +3,7 @@ package gen
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tealeg/xlsx"
+	"github.com/tealeg/xlsx/v3"
 	"github.com/zngw/cfg/conf"
 	"strings"
 )
