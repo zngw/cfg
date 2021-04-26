@@ -83,7 +83,7 @@ func toMdbJs(value interface{}) (str string) {
 func getMdbValue(value interface{}) (str string) {
 	switch value.(type) {
 	case string:
-		str = "\"" + strings.Replace(value.(string), "\n", "\\n", -1) + "\""
+		str = value.(string)
 	case int:
 		str = "NumberInt(\"" + strconv.Itoa(value.(int)) + "\")"
 	case int64:
