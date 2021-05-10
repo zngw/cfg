@@ -1,4 +1,4 @@
-module cfg
+module github.com/zngw/cfg
 
 go 1.14
 
