@@ -51,7 +51,7 @@ git clone https://github.com/zngw/cfg.git
 #### 命令行配置
 
 ```bash
-cfg -c ./cfg.json -pre Table -p ./excel -t all -cli json|ts -ser mdb
+cfg -c ./cfg.json -pre Table -path ./excel -type all -client json|ts -server mdb
 ```
 
 |  参数  | 说明             |
