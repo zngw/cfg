@@ -1,18 +1,36 @@
-package gen
+package out
 
 import (
 	"encoding/csv"
 	"fmt"
+	"github.com/zngw/cfg/conf"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 )
 
+type OutCsv struct {
+	Type string
+	Path string
+}
+
+func (o *OutCsv) Init(path string) (err error) {
+	o.Type = conf.BuildToCsv
+	o.Path = filepath.Join(path, o.Type)
+	err = os.MkdirAll(o.Path, os.ModePerm) //创建目录
+	return
+}
+
+func (o *OutCsv) GetType() (t string) {
+	return o.Type
+}
+
 // 生成csv
-func toCsv(path, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
-	filename := path + file + ".csv"
+func (o *OutCsv) OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
+	filename := filepath.Join(o.Path, file+".csv")
 	nfs, err := os.Create(filename)
 	if err != nil {
 		err = fmt.Errorf("保存文件: %v 失败: %v", filename, err)

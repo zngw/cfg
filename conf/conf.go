@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/zngw/cfg/util"
 	"io/ioutil"
 	"strings"
 )
@@ -32,55 +33,61 @@ const (
 	BuildToCsv  = "csv"  // 输出csv
 )
 
-const ServerPath = "server/" // 服务器生成赠较
-const ClientPath = "client/" // 服务器生成赠较
-
 type Conf struct {
-	// Excel所在目录
-	SrcPath string `json:"path"`
-	// 转换表前缀
-	SheetPrefix string `json:"pre"`
-	// 输出类型
-	BuildType string `json:"type"`
-	// 客户端输出文件类型
-	BuildClient []string `json:"client"`
-	// 服务器输出文件类型
-	BuildServer []string `json:"server"`
+	SrcFiles    []string `json:"files,omitempty"`  // Excel文件,文件存在时，所在目录配置失效
+	SrcPath     string   `json:"path,omitempty"`   // Excel所在目录
+	SheetPrefix string   `json:"pre,omitempty"`    // 转换表前缀
+	BuildType   string   `json:"type,omitempty"`   // 输出类型
+	BuildClient []string `json:"client,omitempty"` // 客户端输出文件类型
+	BuildServer []string `json:"server,omitempty"` // 服务器输出文件类型
+	ServerPath  string   `json:"server,omitempty"` // 服务器生成目录
+	ClientPath  string   `json:"server,omitempty"` // 客户端生成目录
 }
 
 func getDefaultConf() Conf {
 	return Conf{
+		SrcFiles:    []string{},
 		SrcPath:     "./excel",
+		SheetPrefix: "Table",
 		BuildType:   BuildTypeAll,
 		BuildClient: []string{BuildToJson},
 		BuildServer: []string{BuildToMdb},
+		ServerPath:  "./out/server",
+		ClientPath:  "./out/client",
 	}
 }
 
 // 读取配置
 func readConf(file string) (cfg Conf, err error) {
 	cfg = getDefaultConf()
-
-	b, err := ioutil.ReadFile(file)
-	if err != nil {
-		err = fmt.Errorf("读取配置文件 %v 失败: %v", file, err)
-		return cfg, err
+	// 没有配置文件
+	if len(file) == 0 {
+		return
 	}
 
+	// 读取配置文件
+	b, err := ioutil.ReadFile(util.GetAbsPath(file))
+	if err != nil {
+		err = fmt.Errorf("读取配置文件 %v 失败: %v", file, err)
+		return
+	}
+
+	// 解析配置文件
 	err = json.Unmarshal(b, &cfg)
 	if err != nil {
 		err = fmt.Errorf("解析配置文件 %v 失败: %v", file, err)
-		return cfg, err
+		return
 	}
 
 	return
 }
 
 // 获取配置
-func GetConf() (conf Conf) {
+func GetConf() (conf Conf, err error) {
 	// 接收命令行参数，命令行参数会替换文件中的配置
-	// -c ./cfg.json -p ./excel -t all -cli json|ts -ser mdb
-	cfg := flag.String("c", "./conf.json", "传入配置文件")
+	// -c ./conf.json -path ./excel -pre Table -type all -client json|ts -server mdb
+	cfg := flag.String("c", "", "传入配置文件")
+	files := flag.String("files", "", "传入转换文件，如果文件存在刚后面的目录无效")
 	src := flag.String("path", "", "传入转换文件所在目录")
 	pre := flag.String("pre", "", "转换表前缀")
 	typ := flag.String("type", "", "传入转换类型")
@@ -88,9 +95,10 @@ func GetConf() (conf Conf) {
 	ser := flag.String("server", "", "服务器输出文件类型")
 	flag.Parse() //解析输入的参数
 
-	conf, err := readConf(*cfg)
+	conf, err = readConf(*cfg)
 	if err != nil {
-		//fmt.Println("配置文件不存在，使用默认配置", err.Error())
+		fmt.Println("配置文件不存在，使用默认配置:", err.Error())
+		conf = getDefaultConf()
 	}
 
 	if len(*src) > 0 {
@@ -112,6 +120,13 @@ func GetConf() (conf Conf) {
 	if len(*ser) > 0 {
 		conf.BuildServer = strings.Split(*ser, "|")
 	}
+
+	if len(*files) > 0 {
+		conf.SrcFiles = strings.Split(*files, ",")
+	}
+
+	conf.ServerPath = util.GetAbsPath(conf.ServerPath)
+	conf.ClientPath = util.GetAbsPath(conf.ClientPath)
 
 	return
 }

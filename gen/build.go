@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/tealeg/xlsx/v3"
 	"github.com/zngw/cfg/conf"
-	"strings"
+	"github.com/zngw/cfg/out"
 )
 
 // 单文件生成，传入文件路径和配置
@@ -57,7 +57,7 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 
 			// 生成客户端配置
 			if cfg.BuildType == conf.BuildTypeAll || cfg.BuildType == conf.BuildTypeClient {
-				err = build(conf.ClientPath, sheet.Name, attr, &cfg.BuildClient, &ck, &cs)
+				err = out.OutClient(sheet.Name, attr, &ck, &cs)
 				if err != nil {
 					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
 					return
@@ -66,7 +66,7 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 
 			// 生成服务器配置
 			if cfg.BuildType == conf.BuildTypeAll || cfg.BuildType == conf.BuildTypeServer {
-				err = build(conf.ServerPath, sheet.Name, attr, &cfg.BuildServer, &sk, &ss)
+				err = out.OutServer(sheet.Name, attr, &sk, &ss)
 				if err != nil {
 					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
 					return
@@ -78,31 +78,6 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 		}
 	}
 
-	return
-}
-
-// 根据输入文件类型输入出不同配置文件
-func build(path, file string, attr bool, to, k *[]string, s *[]map[string]interface{}) (err error) {
-	if len(*k) == 0 || len(*s) == 0 {
-		return
-	}
-	for _, t := range *to {
-		switch t {
-		case conf.BuildToMdb:
-			err = toMdb(path, file, attr, k, s)
-		case conf.BuildToJson:
-			err = toJson(path, file, attr, s)
-		case conf.BuildToJs:
-			err = toJs(path, file, attr, s)
-		case conf.BuildToTs:
-			err = toTs(path, file, attr, s)
-		case conf.BuildToCsv:
-			err = toCsv(path, file, attr, k, s)
-		default:
-			err = fmt.Errorf("生成失败: %v, 生成类型不存在", file)
-			return
-		}
-	}
 	return
 }
 
@@ -282,7 +257,7 @@ func getValue(tp string, cell *xlsx.Cell) (val interface{}, err error) {
 	case "FLOAT":
 		val, err = cell.Float()
 	case "STRING":
-		val = strings.Replace(cell.String(), "\"", "\\\"", -1)
+		val = cell.String()
 	case "OBJ":
 		str := cell.String()
 		if len(str) == 0 {

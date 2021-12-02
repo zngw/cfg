@@ -1,15 +1,33 @@
-package gen
+package out
 
 import (
 	"fmt"
+	"github.com/zngw/cfg/conf"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
+type OutMdb struct {
+	Type string
+	Path string
+}
+
+func (o *OutMdb) Init(path string) (err error) {
+	o.Type = conf.BuildToMdb
+	o.Path = filepath.Join(path, o.Type)
+	err = os.MkdirAll(o.Path, os.ModePerm) //创建目录
+	return
+}
+
+func (o *OutMdb) GetType() (t string) {
+	return o.Type
+}
+
 // 转MongoDB使用的js脚本
-func toMdb(path, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
+func (o *OutMdb) OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
 	id := ""
 	for _, K := range *keys {
 		k := strings.ToLower(K)
@@ -36,7 +54,7 @@ func toMdb(path, file string, attr bool, keys *[]string, s *[]map[string]interfa
 		str += ");"
 	}
 
-	filename := path + file + ".js"
+	filename := filepath.Join(o.Path, file+".js")
 	err = ioutil.WriteFile(filename, []byte(str), os.ModePerm)
 	if err != nil {
 		fmt.Println("保存文件:", filename, "失败: ", err)
