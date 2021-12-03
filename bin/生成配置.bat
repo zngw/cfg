@@ -1,20 +1,15 @@
 @echo off
 
-rem 获取命令行参数，用于将文件拖入bat上使用
+rem 设置文件参数
+set param=
+
+rem 延迟环境变量扩展, 获取命令行参数，用于将文件拖入bat上使用
+setlocal EnableDelayedExpansion 
 set "files=%*"
+if not "%files%x"=="x" (
+	set "param=-files %files: =,%"
+)
+endlocal & set param=%param%
 
-rem 如果直接运行
-if "%files%x"=="x" (
-	cfg.exe -c ./conf.json
-	goto finish
-) 
-	
-rem 用','分割多个命令行传入文件
-set files=%files: =,%
-
-rem 将命令行拖入文件以files参数传入
-%~dp0cfg.exe -c conf.json -files %files%
-goto finish
-
-:finish
-pause
+rem 传参生成配置
+%~dp0cfg.exe -c conf.json %param%

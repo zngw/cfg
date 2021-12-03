@@ -4,5 +4,7 @@
     "pre":"Table",
     "type": "all",
     "client":["json","js","ts"],
-    "server":["mdb","csv"]
+    "server":["mdb","csv"],
+    "url": "",
+    "key": ""
 }

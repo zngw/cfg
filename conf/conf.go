@@ -31,6 +31,7 @@ const (
 	BuildToTs   = "ts"   // 输出ts格式
 	BuildToMdb  = "mdb"  // 输出Mongodb的js格式
 	BuildToCsv  = "csv"  // 输出csv
+	BuildToPost = "post" // 以json格式post到指定uri上
 )
 
 type Conf struct {
@@ -40,9 +41,13 @@ type Conf struct {
 	BuildType   string   `json:"type,omitempty"`   // 输出类型
 	BuildClient []string `json:"client,omitempty"` // 客户端输出文件类型
 	BuildServer []string `json:"server,omitempty"` // 服务器输出文件类型
-	ServerPath  string   `json:"server,omitempty"` // 服务器生成目录
-	ClientPath  string   `json:"server,omitempty"` // 客户端生成目录
+	ServerPath  string   `json:"sPath,omitempty"`  // 服务器生成目录
+	ClientPath  string   `json:"cPath,omitempty"`  // 客户端生成目录
+	PostUrl     string   `json:"url,omitempty"`    // 客户端生成目录
+	PostKey     string   `json:"key,omitempty"`    // 客户端生成目录
 }
+
+var Cfg Conf
 
 func getDefaultConf() Conf {
 	return Conf{
@@ -82,8 +87,8 @@ func readConf(file string) (cfg Conf, err error) {
 	return
 }
 
-// 获取配置
-func GetConf() (conf Conf, err error) {
+// 初始化配置
+func Init() (err error) {
 	// 接收命令行参数，命令行参数会替换文件中的配置
 	// -c ./conf.json -path ./excel -pre Table -type all -client json|ts -server mdb
 	cfg := flag.String("c", "", "传入配置文件")
@@ -95,38 +100,38 @@ func GetConf() (conf Conf, err error) {
 	ser := flag.String("server", "", "服务器输出文件类型")
 	flag.Parse() //解析输入的参数
 
-	conf, err = readConf(*cfg)
+	Cfg, err = readConf(*cfg)
 	if err != nil {
 		fmt.Println("配置文件不存在，使用默认配置:", err.Error())
-		conf = getDefaultConf()
+		Cfg = getDefaultConf()
 	}
 
 	if len(*src) > 0 {
-		conf.SrcPath = *src
+		Cfg.SrcPath = *src
 	}
 
 	if len(*pre) > 0 {
-		conf.SheetPrefix = *pre
+		Cfg.SheetPrefix = *pre
 	}
 
 	if len(*typ) > 0 {
-		conf.BuildType = *typ
+		Cfg.BuildType = *typ
 	}
 
 	if len(*cli) > 0 {
-		conf.BuildClient = strings.Split(*cli, "|")
+		Cfg.BuildClient = strings.Split(*cli, "|")
 	}
 
 	if len(*ser) > 0 {
-		conf.BuildServer = strings.Split(*ser, "|")
+		Cfg.BuildServer = strings.Split(*ser, "|")
 	}
 
 	if len(*files) > 0 {
-		conf.SrcFiles = strings.Split(*files, ",")
+		Cfg.SrcFiles = strings.Split(*files, ",")
 	}
 
-	conf.ServerPath = util.GetAbsPath(conf.ServerPath)
-	conf.ClientPath = util.GetAbsPath(conf.ClientPath)
+	Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
+	Cfg.ClientPath = util.GetAbsPath(Cfg.ClientPath)
 
 	return
 }

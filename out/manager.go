@@ -18,10 +18,10 @@ type Out interface {
 var ClientOut []Out
 var ServerOut []Out
 
-func Init(cfg *conf.Conf) {
+func Init() {
 	// 加载客户端输出
-	for _, t := range cfg.BuildClient {
-		o, err := create(cfg.ClientPath, t)
+	for _, t := range conf.Cfg.BuildClient {
+		o, err := create(conf.Cfg.ClientPath, t)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -31,14 +31,24 @@ func Init(cfg *conf.Conf) {
 	}
 
 	// 加载服务器输出
-	for _, t := range cfg.BuildServer {
-		o, err := create(cfg.ServerPath, t)
+	for _, t := range conf.Cfg.BuildServer {
+		o, err := create(conf.Cfg.ServerPath, t)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
 
 		ServerOut = append(ServerOut, o)
+	}
+
+	// 加载post
+	if len(conf.Cfg.PostUrl) > 0 {
+		o, err := create("", conf.BuildToPost)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			ServerOut = append(ServerOut, o)
+		}
 	}
 }
 
@@ -82,6 +92,8 @@ func create(path, _type string) (o Out, err error) {
 		o = new(OutTs)
 	case conf.BuildToCsv:
 		o = new(OutCsv)
+	case conf.BuildToPost:
+		o = new(OutPost)
 	default:
 		err = fmt.Errorf("生成类型[%s]不存在", _type)
 		return

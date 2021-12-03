@@ -9,7 +9,7 @@ import (
 )
 
 // 单文件生成，传入文件路径和配置
-func Generate(file string, cfg *conf.Conf) (success int, err error) {
+func Generate(file string) (success int, err error) {
 	xlf, err := xlsx.OpenFile(file)
 	if err != nil {
 		err = fmt.Errorf("读取文件: %v 失败: %v", file, err)
@@ -18,10 +18,10 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 
 	fmt.Println("-----------------------------------------------------------------")
 	fmt.Println("读取配置文件:", file)
-	pre := len(cfg.SheetPrefix)
+	pre := len(conf.Cfg.SheetPrefix)
 	for _, sheet := range xlf.Sheets {
 		// 判断表格生成前缀，如果配置为空则生成所有的表格
-		if sheet.Name[0:pre] == cfg.SheetPrefix {
+		if sheet.Name[0:pre] == conf.Cfg.SheetPrefix {
 			if sheet.MaxRow == 0 || sheet.MaxCol == 0 {
 				err = fmt.Errorf("生成失败: %v 数据为空！", sheet.Name)
 				return
@@ -56,7 +56,7 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 			}
 
 			// 生成客户端配置
-			if cfg.BuildType == conf.BuildTypeAll || cfg.BuildType == conf.BuildTypeClient {
+			if conf.Cfg.BuildType == conf.BuildTypeAll || conf.Cfg.BuildType == conf.BuildTypeClient {
 				err = out.OutClient(sheet.Name, attr, &ck, &cs)
 				if err != nil {
 					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
@@ -65,7 +65,7 @@ func Generate(file string, cfg *conf.Conf) (success int, err error) {
 			}
 
 			// 生成服务器配置
-			if cfg.BuildType == conf.BuildTypeAll || cfg.BuildType == conf.BuildTypeServer {
+			if conf.Cfg.BuildType == conf.BuildTypeAll || conf.Cfg.BuildType == conf.BuildTypeServer {
 				err = out.OutServer(sheet.Name, attr, &sk, &ss)
 				if err != nil {
 					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
