@@ -17,13 +17,6 @@ const (
 	Server = "Server" // 服务器配置
 )
 
-// 编译输入类型
-const (
-	BuildTypeAll    = "all" // 编译服务和客户端
-	BuildTypeClient = "cli" // 编译客户端
-	BuildTypeServer = "ser" // 编译服务器
-)
-
 // 输入文件类型
 const (
 	BuildToJson = "json" // 输出Json格式
@@ -38,13 +31,12 @@ type Conf struct {
 	SrcFiles    []string `json:"files,omitempty"`  // Excel文件,文件存在时，所在目录配置失效
 	SrcPath     string   `json:"path,omitempty"`   // Excel所在目录
 	SheetPrefix string   `json:"pre,omitempty"`    // 转换表前缀
-	BuildType   string   `json:"type,omitempty"`   // 输出类型
 	BuildClient []string `json:"client,omitempty"` // 客户端输出文件类型
 	BuildServer []string `json:"server,omitempty"` // 服务器输出文件类型
 	ServerPath  string   `json:"sPath,omitempty"`  // 服务器生成目录
 	ClientPath  string   `json:"cPath,omitempty"`  // 客户端生成目录
-	PostUrl     string   `json:"url,omitempty"`    // 客户端生成目录
-	PostKey     string   `json:"key,omitempty"`    // 客户端生成目录
+	PostUrl     string   `json:"url,omitempty"`    // Post Json数据地址
+	PostKey     string   `json:"key,omitempty"`    // Post Json验签密钥
 }
 
 var Cfg Conf
@@ -54,9 +46,8 @@ func getDefaultConf() Conf {
 		SrcFiles:    []string{},
 		SrcPath:     "./excel",
 		SheetPrefix: "Table",
-		BuildType:   BuildTypeAll,
-		BuildClient: []string{BuildToJson},
-		BuildServer: []string{BuildToMdb},
+		BuildClient: []string{},
+		BuildServer: []string{},
 		ServerPath:  "./out/server",
 		ClientPath:  "./out/client",
 	}
@@ -95,9 +86,12 @@ func Init() (err error) {
 	files := flag.String("files", "", "传入转换文件，如果文件存在刚后面的目录无效")
 	src := flag.String("path", "", "传入转换文件所在目录")
 	pre := flag.String("pre", "", "转换表前缀")
-	typ := flag.String("type", "", "传入转换类型")
 	cli := flag.String("client", "", "客户端输出文件类型")
 	ser := flag.String("server", "", "服务器输出文件类型")
+	sp := flag.String("sp", "", "服务器生成目录")
+	cp := flag.String("cp", "", "客户端生成目录")
+	url := flag.String("url", "", "Post Json数据地址")
+	key := flag.String("key", "", "Post Json验签密钥")
 	flag.Parse() //解析输入的参数
 
 	Cfg, err = readConf(*cfg)
@@ -114,10 +108,6 @@ func Init() (err error) {
 		Cfg.SheetPrefix = *pre
 	}
 
-	if len(*typ) > 0 {
-		Cfg.BuildType = *typ
-	}
-
 	if len(*cli) > 0 {
 		Cfg.BuildClient = strings.Split(*cli, "|")
 	}
@@ -129,9 +119,24 @@ func Init() (err error) {
 	if len(*files) > 0 {
 		Cfg.SrcFiles = strings.Split(*files, ",")
 	}
+	
+	if len(*sp) > 0 {
+		Cfg.ServerPath = *sp
+		Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
+	}
 
-	Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
-	Cfg.ClientPath = util.GetAbsPath(Cfg.ClientPath)
+	if len(*cp) > 0 {
+		Cfg.ClientPath = *cp
+		Cfg.ClientPath = util.GetAbsPath(Cfg.ClientPath)
+	}
+
+	if len(*url) > 0 {
+		Cfg.PostUrl = *url
+	}
+
+	if len(*key) > 0{
+		Cfg.PostKey = *key
+	}	
 
 	return
 }

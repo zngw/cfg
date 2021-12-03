@@ -56,21 +56,17 @@ func Generate(file string) (success int, err error) {
 			}
 
 			// 生成客户端配置
-			if conf.Cfg.BuildType == conf.BuildTypeAll || conf.Cfg.BuildType == conf.BuildTypeClient {
-				err = out.OutClient(sheet.Name, attr, &ck, &cs)
-				if err != nil {
-					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
-					return
-				}
+			err = out.OutClient(sheet.Name, attr, &ck, &cs)
+			if err != nil {
+				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
+				return
 			}
 
 			// 生成服务器配置
-			if conf.Cfg.BuildType == conf.BuildTypeAll || conf.Cfg.BuildType == conf.BuildTypeServer {
-				err = out.OutServer(sheet.Name, attr, &sk, &ss)
-				if err != nil {
-					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
-					return
-				}
+			err = out.OutServer(sheet.Name, attr, &sk, &ss)
+			if err != nil {
+				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
+				return
 			}
 
 			fmt.Println("生成配置成功:", sheet.Name)

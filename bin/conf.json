@@ -2,7 +2,6 @@
     "files": [],
     "path":"./excel",
     "pre":"Table",
-    "type": "all",
     "client":["json","js","ts"],
     "server":["mdb","csv"],
     "url": "",
