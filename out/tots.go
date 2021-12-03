@@ -16,7 +16,11 @@ type OutTs struct {
 
 func (o *OutTs) Init(path string) (err error) {
 	o.Type = conf.BuildToTs
-	o.Path = filepath.Join(path, o.Type)
+	if conf.Cfg.CreateTypePath {
+		o.Path = filepath.Join(path, o.Type)
+	}else {
+		o.Path = path
+	}
 	err = os.MkdirAll(o.Path, os.ModePerm) //创建目录
 	return
 }

@@ -17,7 +17,11 @@ type OutMdb struct {
 
 func (o *OutMdb) Init(path string) (err error) {
 	o.Type = conf.BuildToMdb
-	o.Path = filepath.Join(path, o.Type)
+	if conf.Cfg.CreateTypePath {
+		o.Path = filepath.Join(path, o.Type)
+	}else {
+		o.Path = path
+	}
 	err = os.MkdirAll(o.Path, os.ModePerm) //创建目录
 	return
 }

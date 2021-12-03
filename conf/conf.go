@@ -28,28 +28,30 @@ const (
 )
 
 type Conf struct {
-	SrcFiles    []string `json:"files,omitempty"`  // Excel文件,文件存在时，所在目录配置失效
-	SrcPath     string   `json:"path,omitempty"`   // Excel所在目录
-	SheetPrefix string   `json:"pre,omitempty"`    // 转换表前缀
-	BuildClient []string `json:"client,omitempty"` // 客户端输出文件类型
-	BuildServer []string `json:"server,omitempty"` // 服务器输出文件类型
-	ServerPath  string   `json:"sPath,omitempty"`  // 服务器生成目录
-	ClientPath  string   `json:"cPath,omitempty"`  // 客户端生成目录
-	PostUrl     string   `json:"url,omitempty"`    // Post Json数据地址
-	PostKey     string   `json:"key,omitempty"`    // Post Json验签密钥
+	SrcFiles       []string `json:"files,omitempty"`  // Excel文件,文件存在时，所在目录配置失效
+	SrcPath        string   `json:"path,omitempty"`   // Excel所在目录
+	SheetPrefix    string   `json:"pre,omitempty"`    // 转换表前缀
+	BuildClient    []string `json:"client,omitempty"` // 客户端输出文件类型
+	BuildServer    []string `json:"server,omitempty"` // 服务器输出文件类型
+	CreateTypePath bool     `json:"tp,omitempty"`     // 是否为生成类型创建子目录
+	ServerPath     string   `json:"sp,omitempty"`     // 服务器生成目录
+	ClientPath     string   `json:"cp,omitempty"`     // 客户端生成目录
+	PostUrl        string   `json:"url,omitempty"`    // Post Json数据地址
+	PostKey        string   `json:"key,omitempty"`    // Post Json验签密钥
 }
 
 var Cfg Conf
 
 func getDefaultConf() Conf {
 	return Conf{
-		SrcFiles:    []string{},
-		SrcPath:     "./excel",
-		SheetPrefix: "Table",
-		BuildClient: []string{},
-		BuildServer: []string{},
-		ServerPath:  "./out/server",
-		ClientPath:  "./out/client",
+		SrcFiles:       []string{},
+		SrcPath:        "./excel",
+		SheetPrefix:    "Table",
+		BuildClient:    []string{},
+		BuildServer:    []string{},
+		CreateTypePath: true,
+		ServerPath:     "./out/server",
+		ClientPath:     "./out/client",
 	}
 }
 
@@ -88,6 +90,7 @@ func Init() (err error) {
 	pre := flag.String("pre", "", "转换表前缀")
 	cli := flag.String("client", "", "客户端输出文件类型")
 	ser := flag.String("server", "", "服务器输出文件类型")
+	tp := flag.Int("tp", -1, "是否为生成类型创建子目录,0-不创建，1-创建")
 	sp := flag.String("sp", "", "服务器生成目录")
 	cp := flag.String("cp", "", "客户端生成目录")
 	url := flag.String("url", "", "Post Json数据地址")
@@ -119,7 +122,11 @@ func Init() (err error) {
 	if len(*files) > 0 {
 		Cfg.SrcFiles = strings.Split(*files, ",")
 	}
-	
+
+	if *tp != -1 {
+		Cfg.CreateTypePath = *tp > 0
+	}
+
 	if len(*sp) > 0 {
 		Cfg.ServerPath = *sp
 		Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
@@ -134,9 +141,9 @@ func Init() (err error) {
 		Cfg.PostUrl = *url
 	}
 
-	if len(*key) > 0{
+	if len(*key) > 0 {
 		Cfg.PostKey = *key
-	}	
+	}
 
 	return
 }
