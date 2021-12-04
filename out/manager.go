@@ -12,7 +12,7 @@ import (
 type Out interface {
 	Init(path string) (err error)
 	GetType() (t string)
-	OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error)
+	OutTo(subPath, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error)
 }
 
 var ClientOut []Out
@@ -52,9 +52,9 @@ func Init() {
 	}
 }
 
-func OutClient(file string, attr bool, k *[]string, s *[]map[string]interface{}) (err error) {
+func Client(subPath, file string, attr bool, k *[]string, s *[]map[string]interface{}) (err error) {
 	for _, o := range ClientOut {
-		outerr := o.OutTo(file, attr, k, s)
+		outerr := o.OutTo(subPath, file, attr, k, s)
 		if outerr != nil {
 			if err == nil {
 				err = fmt.Errorf("%s 生成 %s 失败", file, o.GetType())
@@ -66,9 +66,9 @@ func OutClient(file string, attr bool, k *[]string, s *[]map[string]interface{})
 	return
 }
 
-func OutServer(file string, attr bool, k *[]string, s *[]map[string]interface{}) (err error) {
+func Server(subPath, file string, attr bool, k *[]string, s *[]map[string]interface{}) (err error) {
 	for _, o := range ServerOut {
-		outerr := o.OutTo(file, attr, k, s)
+		outerr := o.OutTo(subPath, file, attr, k, s)
 		if outerr != nil {
 			if err == nil {
 				err = fmt.Errorf("%s 生成 %s 失败", file, o.GetType())
@@ -83,17 +83,17 @@ func OutServer(file string, attr bool, k *[]string, s *[]map[string]interface{})
 func create(path, _type string) (o Out, err error) {
 	switch _type {
 	case conf.BuildToMdb:
-		o = new(OutMdb)
+		o = new(Mdb)
 	case conf.BuildToJson:
-		o = new(OutJson)
+		o = new(Json)
 	case conf.BuildToJs:
-		o = new(OutJs)
+		o = new(Js)
 	case conf.BuildToTs:
-		o = new(OutTs)
+		o = new(Ts)
 	case conf.BuildToCsv:
-		o = new(OutCsv)
+		o = new(Csv)
 	case conf.BuildToPost:
-		o = new(OutPost)
+		o = new(Post)
 	default:
 		err = fmt.Errorf("生成类型[%s]不存在", _type)
 		return

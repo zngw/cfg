@@ -34,6 +34,7 @@ type Conf struct {
 	BuildClient    []string `json:"client,omitempty"` // 客户端输出文件类型
 	BuildServer    []string `json:"server,omitempty"` // 服务器输出文件类型
 	CreateTypePath bool     `json:"tp,omitempty"`     // 是否为生成类型创建子目录
+	ReserveSubPath bool     `json:"rp,omitempty"`     // 是否为生成类型创建子目录
 	ServerPath     string   `json:"sp,omitempty"`     // 服务器生成目录
 	ClientPath     string   `json:"cp,omitempty"`     // 客户端生成目录
 	PostUrl        string   `json:"url,omitempty"`    // Post Json数据地址
@@ -50,6 +51,7 @@ func getDefaultConf() Conf {
 		BuildClient:    []string{},
 		BuildServer:    []string{},
 		CreateTypePath: true,
+		ReserveSubPath: false,
 		ServerPath:     "./out/server",
 		ClientPath:     "./out/client",
 	}
@@ -91,6 +93,7 @@ func Init() (err error) {
 	cli := flag.String("client", "", "客户端输出文件类型")
 	ser := flag.String("server", "", "服务器输出文件类型")
 	tp := flag.Int("tp", -1, "是否为生成类型创建子目录,0-不创建，1-创建")
+	rp := flag.Int("rp", -1, "以目录格式生成时，是否保留子目录,0-不创建，1-创建")
 	sp := flag.String("sp", "", "服务器生成目录")
 	cp := flag.String("cp", "", "客户端生成目录")
 	url := flag.String("url", "", "Post Json数据地址")
@@ -127,14 +130,16 @@ func Init() (err error) {
 		Cfg.CreateTypePath = *tp > 0
 	}
 
+	if *rp != -1 {
+		Cfg.ReserveSubPath = *rp > 0
+	}
+
 	if len(*sp) > 0 {
 		Cfg.ServerPath = *sp
-		Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
 	}
 
 	if len(*cp) > 0 {
 		Cfg.ClientPath = *cp
-		Cfg.ClientPath = util.GetAbsPath(Cfg.ClientPath)
 	}
 
 	if len(*url) > 0 {
@@ -144,6 +149,10 @@ func Init() (err error) {
 	if len(*key) > 0 {
 		Cfg.PostKey = *key
 	}
+
+	Cfg.SrcPath = util.GetAbsPath(Cfg.SrcPath)
+	Cfg.ClientPath = util.GetAbsPath(Cfg.ClientPath)
+	Cfg.ServerPath = util.GetAbsPath(Cfg.ServerPath)
 
 	return
 }

@@ -24,25 +24,25 @@ type updata struct {
 	Sign string
 }
 
-type OutPost struct {
+type Post struct {
 	Type string
 	Url  string
 	Key  string
 }
 
-func (o *OutPost) Init(path string) (err error) {
+func (o *Post) Init(path string) (err error) {
 	o.Type = conf.BuildToPost
 	o.Url = conf.Cfg.PostUrl
 	o.Key = conf.Cfg.PostKey
 	return
 }
 
-func (o *OutPost) GetType() (t string) {
+func (o *Post) GetType() (t string) {
 	return o.Type
 }
 
 // 转JS
-func (o *OutPost) OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
+func (o *Post) OutTo(subPath, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
 	data, err := json.Marshal(*s)
 	if err != nil {
 		return

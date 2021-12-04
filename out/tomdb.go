@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-type OutMdb struct {
+type Mdb struct {
 	Type string
 	Path string
 }
 
-func (o *OutMdb) Init(path string) (err error) {
+func (o *Mdb) Init(path string) (err error) {
 	o.Type = conf.BuildToMdb
 	if conf.Cfg.CreateTypePath {
 		o.Path = filepath.Join(path, o.Type)
@@ -26,12 +26,12 @@ func (o *OutMdb) Init(path string) (err error) {
 	return
 }
 
-func (o *OutMdb) GetType() (t string) {
+func (o *Mdb) GetType() (t string) {
 	return o.Type
 }
 
 // 转MongoDB使用的js脚本
-func (o *OutMdb) OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
+func (o *Mdb) OutTo(subPath, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
 	id := ""
 	for _, K := range *keys {
 		k := strings.ToLower(K)
@@ -58,7 +58,16 @@ func (o *OutMdb) OutTo(file string, attr bool, keys *[]string, s *[]map[string]i
 		str += ");"
 	}
 
-	filename := filepath.Join(o.Path, file+".js")
+	path := o.Path
+	if conf.Cfg.ReserveSubPath && len(subPath) > 0 {
+		path = filepath.Join(o.Path, subPath)
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			fmt.Println("创建子目录错误", err)
+			path = o.Path
+		}
+	}
+	filename := filepath.Join(path, file+".js")
 	err = ioutil.WriteFile(filename, []byte(str), os.ModePerm)
 	if err != nil {
 		fmt.Println("保存文件:", filename, "失败: ", err)

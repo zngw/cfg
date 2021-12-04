@@ -6,6 +6,9 @@ import (
 	"github.com/tealeg/xlsx/v3"
 	"github.com/zngw/cfg/conf"
 	"github.com/zngw/cfg/out"
+	"github.com/zngw/cfg/util"
+	"path/filepath"
+	"strings"
 )
 
 // 单文件生成，传入文件路径和配置
@@ -15,6 +18,17 @@ func Generate(file string) (success int, err error) {
 		err = fmt.Errorf("读取文件: %v 失败: %v", file, err)
 		return
 	}
+
+	subPath := ""
+	fp, _ := filepath.Split(file)
+	fp = util.GetAbsPath(fp)
+	if len(conf.Cfg.SrcPath) > 0 {
+		index := strings.Index(fp, conf.Cfg.SrcPath)
+		if index == 0{
+			subPath = fp[len(conf.Cfg.SrcPath)+1:]
+		}
+	}
+
 
 	fmt.Println("-----------------------------------------------------------------")
 	fmt.Println("读取配置文件:", file)
@@ -56,14 +70,14 @@ func Generate(file string) (success int, err error) {
 			}
 
 			// 生成客户端配置
-			err = out.OutClient(sheet.Name, attr, &ck, &cs)
+			err = out.Client(subPath,sheet.Name, attr, &ck, &cs)
 			if err != nil {
 				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
 				return
 			}
 
 			// 生成服务器配置
-			err = out.OutServer(sheet.Name, attr, &sk, &ss)
+			err = out.Server(subPath,sheet.Name, attr, &sk, &ss)
 			if err != nil {
 				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
 				return

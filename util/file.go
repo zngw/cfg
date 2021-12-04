@@ -16,6 +16,8 @@ func GetAbsPath(path string) (out string) {
 	dir := GetCurrentDirectory()
 	if !filepath.IsAbs(path) {
 		out = filepath.Join(dir, path)
+	} else {
+		out = path
 	}
 	return
 }

@@ -12,12 +12,12 @@ import (
 	"strings"
 )
 
-type OutCsv struct {
+type Csv struct {
 	Type string
 	Path string
 }
 
-func (o *OutCsv) Init(path string) (err error) {
+func (o *Csv) Init(path string) (err error) {
 	o.Type = conf.BuildToCsv
 	if conf.Cfg.CreateTypePath {
 		o.Path = filepath.Join(path, o.Type)
@@ -28,13 +28,22 @@ func (o *OutCsv) Init(path string) (err error) {
 	return
 }
 
-func (o *OutCsv) GetType() (t string) {
+func (o *Csv) GetType() (t string) {
 	return o.Type
 }
 
 // 生成csv
-func (o *OutCsv) OutTo(file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
-	filename := filepath.Join(o.Path, file+".csv")
+func (o *Csv) OutTo(subPath, file string, attr bool, keys *[]string, s *[]map[string]interface{}) (err error) {
+	path := o.Path
+	if conf.Cfg.ReserveSubPath && len(subPath) > 0 {
+		path = filepath.Join(o.Path, subPath)
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			fmt.Println("创建子目录错误", err)
+			path = o.Path
+		}
+	}
+	filename := filepath.Join(path, file+".csv")
 	nfs, err := os.Create(filename)
 	if err != nil {
 		err = fmt.Errorf("保存文件: %v 失败: %v", filename, err)
