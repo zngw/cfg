@@ -70,17 +70,22 @@ func Generate(file string) (success int, err error) {
 			}
 
 			// 生成客户端配置
-			err = out.Client(subPath,sheet.Name, attr, &ck, &cs)
-			if err != nil {
-				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
-				return
+			if ck!=nil && len(ck) > 0 {
+				err = out.Client(subPath,sheet.Name, attr, &ck, &cs)
+				if err != nil {
+					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
+					return
+				}
 			}
 
+
 			// 生成服务器配置
-			err = out.Server(subPath,sheet.Name, attr, &sk, &ss)
-			if err != nil {
-				err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
-				return
+			if sk!=nil && len(sk) > 0 {
+				err = out.Server(subPath,sheet.Name, attr, &sk, &ss)
+				if err != nil {
+					err = fmt.Errorf("生成失败: %v, %v", sheet.Name, err)
+					return
+				}
 			}
 
 			fmt.Println("生成配置成功:", sheet.Name)
